@@ -40,8 +40,8 @@ class Mul_Attn(nn.Module):
         self.Linear_K = nn.Linear(d_model, head_n*d_k)
         self.Linear_V = nn.Linear(d_model, head_n*d_v)
 
-        self.time_q = nn.Linear(10, head_n*d_q)
-        self.time_k = nn.Linear(10, head_n*d_k)
+        self.time_q = nn.Linear(10, head_n*10)
+        self.time_k = nn.Linear(10, head_n*10)
 
         self.attn = Attn()
         self.Linear = nn.Linear(head_n*d_v, d_model)
@@ -54,11 +54,11 @@ class Mul_Attn(nn.Module):
                   (self.Linear_K(k)/math.sqrt(self.d_model)).view(batch_size, -1, self.head_n, self.d_k).transpose(1,2), \
                   (self.Linear_V(v)/math.sqrt(self.d_model)).view(batch_size, -1, self.head_n, self.d_v).transpose(1,2)
 
-        t_Q, t_K = (self.time_q(time)/math.sqrt(self.d_model)).view(batch_size, -1, self.head_n, self.d_q).transpose(1,2), \
-                   (self.time_k(time)/math.sqrt(self.d_model)).view(batch_size, -1, self.head_n, self.d_k).transpose(1,2)
+        t_Q, t_K = (self.time_q(time)/math.sqrt(self.d_model)).view(batch_size, -1, self.head_n, 10).transpose(1,2), \
+                   (self.time_k(time)/math.sqrt(self.d_model)).view(batch_size, -1, self.head_n, 10).transpose(1,2)
 
-        Q = Q + t_Q
-        K = K + t_K        
+        Q = torch.cat([Q, t_Q], dim=-1)
+        K = torch.cat([K, t_K], dim=-1)      
 
         if mask is not None:
             mask = mask.unsqueeze(1)
