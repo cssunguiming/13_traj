@@ -35,9 +35,9 @@ class transformer_layer(nn.Module):
         self.connect1 = SublayerConnection(size=size, dropout=dropout)
         self.connect2 = SublayerConnection(size=size, dropout=dropout)
 
-    def forward(self, x, mask):
+    def forward(self, x, time, mask):
 
-        self_attn = self.connect1(x, lambda x: self.attn(x, x, x, mask))
+        self_attn = self.connect1(x, lambda x: self.attn(x, x, x, time, mask))
         output = self.connect2(self_attn, self.feed_forward)
         return output
 
@@ -66,6 +66,7 @@ class Bert_Traj_Model(nn.Module):
         super(Bert_Traj_Model, self).__init__()
 
         self.N_layers = N_layers
+        self.time_embed = nn.Embedding(49, 10, padding_idx=0)
         self.Embed = Bert_Embedding(token_size=token_size, d_model=d_model, dropout=dropout)
         self.trans_layers = nn.ModuleList([copy.deepcopy(
             transformer_layer(size=d_model, head_n=head_n, d_model=d_model, d_ff=d_model*4, dropout=dropout)) for _ in range(N_layers)])
@@ -75,6 +76,7 @@ class Bert_Traj_Model(nn.Module):
     def forward(self, x, time, len_traj):
         # x:    [batch_size, seq_size] --> [batch_size, head_n, seq_size, seq_size]
         # mask: [batch_size, seq_size]
+        time = self.time_embed(time)
         len_s = x.size(-1)
         mask_pad = (x > 0).unsqueeze(1).repeat(1, x.size(1), 1)
         mask_next = (1 - torch.triu(torch.ones((1, len_s, len_s), device=x.device), diagonal=1)).bool()
@@ -94,6 +96,6 @@ class Bert_Traj_Model(nn.Module):
         x = self.Embed(x, time)
 
         for i, layer in enumerate(self.trans_layers):
-            x = layer(x, mask)
+            x = layer(x, time, mask)
 
         return x

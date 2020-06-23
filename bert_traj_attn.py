@@ -40,16 +40,25 @@ class Mul_Attn(nn.Module):
         self.Linear_K = nn.Linear(d_model, head_n*d_k)
         self.Linear_V = nn.Linear(d_model, head_n*d_v)
 
+        self.time_q = nn.Linear(10, head_n*d_q)
+        self.time_k = nn.Linear(10, head_n*d_k)
+
         self.attn = Attn()
         self.Linear = nn.Linear(head_n*d_v, d_model)
 
-    def forward(self, q, k, v, mask=None):
+    def forward(self, q, k, v, time, mask=None):
         # x: [batch_size, seq_size, d_model]
         batch_size = q.size(0)
 
         Q, K, V = (self.Linear_Q(q)/math.sqrt(self.d_model)).view(batch_size, -1, self.head_n, self.d_q).transpose(1,2), \
                   (self.Linear_K(k)/math.sqrt(self.d_model)).view(batch_size, -1, self.head_n, self.d_k).transpose(1,2), \
                   (self.Linear_V(v)/math.sqrt(self.d_model)).view(batch_size, -1, self.head_n, self.d_v).transpose(1,2)
+
+        t_Q, t_K = (self.time_q(time)/math.sqrt(self.d_model)).view(batch_size, -1, self.head_n, self.d_q).transpose(1,2), \
+                   (self.time_k(time)/math.sqrt(self.d_model)).view(batch_size, -1, self.head_n, self.d_k).transpose(1,2)
+
+        Q = Q + t_Q
+        K = K + t_K        
 
         if mask is not None:
             mask = mask.unsqueeze(1)
