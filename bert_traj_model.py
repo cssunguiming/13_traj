@@ -98,4 +98,4 @@ class Bert_Traj_Model(nn.Module):
         for i, layer in enumerate(self.trans_layers):
             x = layer(x, time, mask)
 
-        return self.layer_norm
+        return self.layer_norm(x)
