@@ -39,7 +39,7 @@ class Predict_Model(nn.Module):
         self.place_Linear = nn.Linear(d_model, token_size)
         # self.time_Linear = nn.Linear(10, 49)
 
-        # self.place_Linear.weight = Bert_Traj_Model.Embed.token_embed.token_embed.weight
+        self.place_Linear.weight = Bert_Traj_Model.Embed.token_embed.token_embed.weight
         # self.time_Linear.weight = Bert_Traj_Model.Embed.token_embed.time_embed.weight
 
         for p in self.parameters():
