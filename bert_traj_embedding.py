@@ -36,6 +36,8 @@ class Token_Embedding(nn.Module):
         self.time_embed = nn.Embedding(49, d_model, padding_idx=0)
 
     def forward(self, x, time):
+        # print(x, time)
+        # exit()
         Embed = self.token_embed(x) + self.time_embed(time)
         # Embed = torch.cat((self.token_embed(x), self.time_embed(time)), dim=-1)
         # Embed = self.token_embed(x)

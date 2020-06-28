@@ -69,7 +69,7 @@ class Bert_Traj_Model(nn.Module):
         self.feed_forward =  PositionwiseFeedForward(d_model=d_model, d_ff=d_model*4, dropout=dropout)
 
         self.N_layers = N_layers
-        self.time_embed = nn.Embedding(49, 10, padding_idx=0)
+        # self.time_embed = nn.Embedding(49, 10, padding_idx=0)
         self.Embed = Bert_Embedding(token_size=token_size, d_model=d_model, dropout=dropout)
         self.trans_layers = nn.ModuleList([copy.deepcopy(
             transformer_layer(size=d_model, head_n=head_n, d_model=d_model, d_ff=d_model*4, Mul_Attn=self.attn, PositionwiseFeedForward=self.feed_forward, dropout=dropout)) for _ in range(N_layers)])
@@ -79,7 +79,7 @@ class Bert_Traj_Model(nn.Module):
     def forward(self, x, time, len_traj):
         # x:    [batch_size, seq_size] --> [batch_size, head_n, seq_size, seq_size]
         # mask: [batch_size, seq_size]
-        time = self.time_embed(time)
+        # time = self.time_embed(time)
         len_s = x.size(-1)
         mask_pad = (x > 0).unsqueeze(1).repeat(1, x.size(1), 1)
         mask_next = (1 - torch.triu(torch.ones((1, len_s, len_s), device=x.device), diagonal=1)).bool()
