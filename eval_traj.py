@@ -14,7 +14,7 @@ def cal_loss_performance(logit1=None, logit2=None, label1=None, label2=None, Pre
         # n_time_cor = (label1.ne(0) * label2.eq(logit2.argmax(-1))).sum().item()
 
         if smoothing:
-            eps = 0.1
+            eps = 0.2
             n_class = logit1.size(1)
 
             one_hot = torch.zeros_like(logit1).scatter(1, label1.view(-1, 1), 1)
