@@ -43,7 +43,7 @@ class Mul_Attn(nn.Module):
         # self.time_q = nn.Linear(10, head_n*10)
         # self.time_k = nn.Linear(10, head_n*10)
 
-        self.attn = Attn()
+        self.attn = Attn(dropout=dropout)
         self.Linear = nn.Linear(head_n*d_v, d_model)
 
     def forward(self, q, k, v, mask=None):
